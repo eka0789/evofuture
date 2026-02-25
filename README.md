@@ -37,8 +37,8 @@ Enterprise-ready SaaS platform built with Next.js 14, TypeScript, and modern web
 
 1. Clone and install:
 ```bash
-git clone <repository-url>
-cd evolution-future
+git clone https://github.com/eka0789/evofuture.git
+cd evofuture
 npm install
 ```
 
