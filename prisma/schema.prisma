@@ -31,6 +31,13 @@ model User {
   notifyPush      Boolean @default(false)
   notifyMarketing Boolean @default(false)
 
+  // Subscription & Billing
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  plan                   String    @default("FREE")
+
   @@index([email])
   @@map("users")
 }
