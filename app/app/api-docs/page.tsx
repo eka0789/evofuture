@@ -5,133 +5,29 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Copy, Check } from 'lucide-react';
-
-const apiEndpoints = [
-  {
-    category: 'Authentication',
-    endpoints: [
-      {
-        method: 'POST',
-        path: '/api/auth/signin',
-        description: 'Sign in with credentials',
-        body: { email: 'string', password: 'string' },
-        response: { user: 'object', token: 'string' },
-      },
-    ],
-  },
-  {
-    category: 'User',
-    endpoints: [
-      {
-        method: 'GET',
-        path: '/api/user/settings',
-        description: 'Get user settings',
-        auth: true,
-        response: { user: 'object' },
-      },
-      {
-        method: 'PATCH',
-        path: '/api/user/settings',
-        description: 'Update user settings',
-        auth: true,
-        body: { name: 'string?', notifyEmail: 'boolean?' },
-        response: { user: 'object' },
-      },
-      {
-        method: 'POST',
-        path: '/api/user/password',
-        description: 'Change password',
-        auth: true,
-        body: { currentPassword: 'string', newPassword: 'string', confirmPassword: 'string' },
-        response: { success: 'boolean' },
-      },
-      {
-        method: 'POST',
-        path: '/api/user/avatar',
-        description: 'Upload avatar image',
-        auth: true,
-        body: 'FormData with avatar file',
-        response: { avatarUrl: 'string' },
-      },
-    ],
-  },
-  {
-    category: 'Activities',
-    endpoints: [
-      {
-        method: 'GET',
-        path: '/api/activities',
-        description: 'Get user activities',
-        auth: true,
-        query: { limit: 'number?', offset: 'number?' },
-        response: { activities: 'array' },
-      },
-    ],
-  },
-  {
-    category: 'Notifications',
-    endpoints: [
-      {
-        method: 'GET',
-        path: '/api/notifications',
-        description: 'Get user notifications',
-        auth: true,
-        response: { notifications: 'array' },
-      },
-      {
-        method: 'POST',
-        path: '/api/notifications/mark-all-read',
-        description: 'Mark all notifications as read',
-        auth: true,
-        response: { success: 'boolean' },
-      },
-    ],
-  },
-  {
-    category: 'Analytics',
-    endpoints: [
-      {
-        method: 'GET',
-        path: '/api/analytics',
-        description: 'Get analytics data',
-        auth: true,
-        query: { period: 'string?' },
-        response: { data: 'object' },
-      },
-      {
-        method: 'GET',
-        path: '/api/stats',
-        description: 'Get dashboard statistics',
-        auth: true,
-        response: { stats: 'object' },
-      },
-    ],
-  },
-];
+import { Code, Copy, Book, Zap, Shield, Check } from 'lucide-react';
+import { apiDocumentation, codeExamples } from '@/lib/api-docs';
+import { useToast } from '@/hooks/use-toast';
 
 export default function ApiDocsPage() {
-  const [copiedPath, setCopiedPath] = useState<string | null>(null);
+  const { toast } = useToast();
+  const [selectedEndpoint, setSelectedEndpoint] = useState<string | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState('javascript');
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedPath(text);
-    setTimeout(() => setCopiedPath(null), 2000);
+    toast('Copied to clipboard', 'success');
   };
 
   const getMethodColor = (method: string) => {
-    switch (method) {
-      case 'GET':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'POST':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'PATCH':
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
-      case 'DELETE':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
-    }
+    const colors = {
+      get: 'bg-blue-100 text-blue-800',
+      post: 'bg-green-100 text-green-800',
+      patch: 'bg-yellow-100 text-yellow-800',
+      put: 'bg-orange-100 text-orange-800',
+      delete: 'bg-red-100 text-red-800',
+    };
+    return colors[method.toLowerCase() as keyof typeof colors] || 'bg-gray-100 text-gray-800';
   };
 
   return (
@@ -139,109 +35,421 @@ export default function ApiDocsPage() {
       <div>
         <h1 className="text-3xl font-bold">API Documentation</h1>
         <p className="text-muted-foreground mt-2">
-          Complete reference for Evolution Future API endpoints
+          Complete reference for Evolution Future SaaS API
         </p>
       </div>
 
+      {/* Quick Start */}
       <Card>
         <CardHeader>
-          <CardTitle>Getting Started</CardTitle>
+          <CardTitle className="flex items-center gap-2">
+            <Zap className="h-5 w-5" />
+            Quick Start
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <h3 className="font-semibold mb-2">Base URL</h3>
-            <code className="bg-muted px-3 py-1 rounded">
-              {process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}
+            <code className="block bg-muted p-3 rounded-md">
+              {apiDocumentation.servers[0].url}
             </code>
           </div>
           <div>
             <h3 className="font-semibold mb-2">Authentication</h3>
-            <p className="text-sm text-muted-foreground">
-              Most endpoints require authentication. Include your session cookie or JWT token in requests.
+            <p className="text-sm text-muted-foreground mb-2">
+              All API requests require authentication using session cookies or bearer tokens.
             </p>
-          </div>
-          <div>
-            <h3 className="font-semibold mb-2">Rate Limiting</h3>
-            <p className="text-sm text-muted-foreground">
-              API requests are limited to 100 requests per minute per user.
-            </p>
+            <div className="space-y-2">
+              <div className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-1" />
+                <div>
+                  <p className="text-sm font-medium">Session Cookie (Recommended)</p>
+                  <p className="text-xs text-muted-foreground">
+                    Automatically included when using the web app
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <Check className="h-4 w-4 text-green-500 mt-1" />
+                <div>
+                  <p className="text-sm font-medium">Bearer Token</p>
+                  <p className="text-xs text-muted-foreground">
+                    For external integrations and API clients
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
-      <Tabs defaultValue={apiEndpoints[0].category} className="space-y-6">
+      {/* API Endpoints */}
+      <Tabs defaultValue="user" className="space-y-4">
         <TabsList>
-          {apiEndpoints.map((category) => (
-            <TabsTrigger key={category.category} value={category.category}>
-              {category.category}
-            </TabsTrigger>
-          ))}
+          <TabsTrigger value="user">User</TabsTrigger>
+          <TabsTrigger value="team">Team</TabsTrigger>
+          <TabsTrigger value="activity">Activity</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="billing">Billing</TabsTrigger>
         </TabsList>
 
-        {apiEndpoints.map((category) => (
-          <TabsContent key={category.category} value={category.category} className="space-y-4">
-            {category.endpoints.map((endpoint, idx) => (
-              <Card key={idx}>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <Badge className={getMethodColor(endpoint.method)}>
-                        {endpoint.method}
-                      </Badge>
-                      <code className="text-sm">{endpoint.path}</code>
+        {/* User Endpoints */}
+        <TabsContent value="user" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>User Endpoints</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* GET /api/user/profile */}
+              <div className="border-b pb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className={getMethodColor('get')}>GET</Badge>
+                  <code className="text-sm">/api/user/profile</code>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Get the authenticated user's profile information
+                </p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Response</h4>
+                    <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+{`{
+  "id": "uuid",
+  "email": "user@example.com",
+  "name": "John Doe",
+  "role": "USER",
+  "plan": "PRO",
+  "createdAt": "2024-01-01T00:00:00Z"
+}`}
+                    </pre>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Code Example</h4>
+                    <div className="flex gap-2 mb-2">
+                      {['javascript', 'python', 'curl'].map(lang => (
+                        <Button
+                          key={lang}
+                          size="sm"
+                          variant={selectedLanguage === lang ? 'default' : 'outline'}
+                          onClick={() => setSelectedLanguage(lang)}
+                        >
+                          {lang}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="relative">
+                      <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+                        {codeExamples[selectedLanguage as keyof typeof codeExamples]?.getUserProfile}
+                      </pre>
                       <Button
-                        variant="ghost"
                         size="sm"
-                        onClick={() => copyToClipboard(endpoint.path)}
-                      >
-                        {copiedPath === endpoint.path ? (
-                          <Check className="h-4 w-4" />
-                        ) : (
-                          <Copy className="h-4 w-4" />
+                        variant="ghost"
+                        className="absolute top-2 right-2"
+                        onClick={() => copyToClipboard(
+                          codeExamples[selectedLanguage as keyof typeof codeExamples]?.getUserProfile
                         )}
+                      >
+                        <Copy className="h-4 w-4" />
                       </Button>
                     </div>
-                    {endpoint.auth && (
-                      <Badge variant="outline">Requires Auth</Badge>
-                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {endpoint.description}
-                  </p>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {endpoint.query && (
-                    <div>
-                      <h4 className="font-semibold text-sm mb-2">Query Parameters</h4>
-                      <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                        {JSON.stringify(endpoint.query, null, 2)}
+                </div>
+              </div>
+
+              {/* PATCH /api/user/profile */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className={getMethodColor('patch')}>PATCH</Badge>
+                  <code className="text-sm">/api/user/profile</code>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Update the authenticated user's profile
+                </p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Request Body</h4>
+                    <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+{`{
+  "name": "John Doe",
+  "email": "newemail@example.com"
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Team Endpoints */}
+        <TabsContent value="team" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Team Endpoints</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* GET /api/team */}
+              <div className="border-b pb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className={getMethodColor('get')}>GET</Badge>
+                  <code className="text-sm">/api/team</code>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  List all teams the user is a member of
+                </p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Response</h4>
+                    <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+{`{
+  "teams": [
+    {
+      "id": "uuid",
+      "name": "My Team",
+      "slug": "my-team",
+      "description": "Team description",
+      "members": [...],
+      "_count": { "members": 5 }
+    }
+  ]
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+
+              {/* POST /api/team */}
+              <div className="border-b pb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className={getMethodColor('post')}>POST</Badge>
+                  <code className="text-sm">/api/team</code>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create a new team
+                </p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Request Body</h4>
+                    <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+{`{
+  "name": "My Team",
+  "description": "Optional description"
+}`}
+                    </pre>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Code Example</h4>
+                    <div className="relative">
+                      <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+                        {codeExamples[selectedLanguage as keyof typeof codeExamples]?.createTeam}
                       </pre>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="absolute top-2 right-2"
+                        onClick={() => copyToClipboard(
+                          codeExamples[selectedLanguage as keyof typeof codeExamples]?.createTeam
+                        )}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
                     </div>
-                  )}
-                  {endpoint.body && (
-                    <div>
-                      <h4 className="font-semibold text-sm mb-2">Request Body</h4>
-                      <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                        {typeof endpoint.body === 'string'
-                          ? endpoint.body
-                          : JSON.stringify(endpoint.body, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                  {endpoint.response && (
-                    <div>
-                      <h4 className="font-semibold text-sm mb-2">Response</h4>
-                      <pre className="bg-muted p-3 rounded text-xs overflow-x-auto">
-                        {JSON.stringify(endpoint.response, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            ))}
-          </TabsContent>
-        ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* POST /api/team/{teamId}/invite */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className={getMethodColor('post')}>POST</Badge>
+                  <code className="text-sm">/api/team/:teamId/invite</code>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Invite a member to the team (Admin/Owner only)
+                </p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Request Body</h4>
+                    <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+{`{
+  "email": "colleague@example.com",
+  "role": "MEMBER" // or "ADMIN"
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Activity Endpoints */}
+        <TabsContent value="activity" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Activity Endpoints</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 mb-3">
+                <Badge className={getMethodColor('get')}>GET</Badge>
+                <code className="text-sm">/api/activities</code>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Get user activity history
+              </p>
+              
+              <div className="space-y-3">
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Query Parameters</h4>
+                  <ul className="text-sm space-y-1">
+                    <li><code>limit</code> - Number of activities to return (default: 50)</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Analytics Endpoints */}
+        <TabsContent value="analytics" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Analytics Endpoints</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2 mb-3">
+                <Badge className={getMethodColor('get')}>GET</Badge>
+                <code className="text-sm">/api/analytics/advanced</code>
+                <Badge variant="outline" className="ml-2">Admin Only</Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Get comprehensive analytics data
+              </p>
+              
+              <div className="space-y-3">
+                <div>
+                  <h4 className="text-sm font-semibold mb-2">Query Parameters</h4>
+                  <ul className="text-sm space-y-1">
+                    <li><code>days</code> - Number of days to analyze (default: 30)</li>
+                    <li><code>format</code> - Response format: json or csv</li>
+                  </ul>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Billing Endpoints */}
+        <TabsContent value="billing" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Billing Endpoints</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="border-b pb-6">
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className={getMethodColor('post')}>POST</Badge>
+                  <code className="text-sm">/api/stripe/checkout</code>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create a Stripe checkout session
+                </p>
+                
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Request Body</h4>
+                    <pre className="bg-muted p-3 rounded-md text-xs overflow-x-auto">
+{`{
+  "priceId": "price_xxx" // Stripe price ID
+}`}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Badge className={getMethodColor('post')}>POST</Badge>
+                  <code className="text-sm">/api/stripe/portal</code>
+                </div>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Create a billing portal session
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* Rate Limiting */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Rate Limiting
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground mb-4">
+            API requests are rate limited to ensure fair usage:
+          </p>
+          <ul className="text-sm space-y-2">
+            <li>• Free Plan: 100 requests per hour</li>
+            <li>• Pro Plan: 1,000 requests per hour</li>
+            <li>• Enterprise Plan: 10,000 requests per hour</li>
+          </ul>
+          <p className="text-sm text-muted-foreground mt-4">
+            Rate limit headers are included in all responses:
+          </p>
+          <pre className="bg-muted p-3 rounded-md text-xs mt-2">
+{`X-RateLimit-Limit: 1000
+X-RateLimit-Remaining: 999
+X-RateLimit-Reset: 1640000000`}
+          </pre>
+        </CardContent>
+      </Card>
+
+      {/* Error Codes */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Error Codes</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-start gap-3">
+              <code className="text-red-600">400</code>
+              <span>Bad Request - Invalid input or parameters</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <code className="text-red-600">401</code>
+              <span>Unauthorized - Authentication required</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <code className="text-red-600">403</code>
+              <span>Forbidden - Insufficient permissions</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <code className="text-red-600">404</code>
+              <span>Not Found - Resource does not exist</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <code className="text-red-600">429</code>
+              <span>Too Many Requests - Rate limit exceeded</span>
+            </div>
+            <div className="flex items-start gap-3">
+              <code className="text-red-600">500</code>
+              <span>Internal Server Error - Something went wrong</span>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
