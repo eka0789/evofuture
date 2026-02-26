@@ -127,15 +127,23 @@ docker run -p 3000:3000 evolution-future
 
 ## Future Roadmap
 
-- [ ] Payment integration (Stripe/Midtrans)
-- [ ] AI agent modules
-- [ ] WebSocket real-time features
-- [ ] Multi-tenancy support
-- [ ] White-label capabilities
-- [ ] Advanced analytics
-- [ ] Team collaboration features
-- [ ] API documentation
-- [ ] Mobile app
+### ✅ Completed
+- [x] **Payment integration (Stripe)** - Full subscription management with webhooks
+- [x] **WebSocket real-time features** - Live notifications, presence, typing indicators
+
+### 🚧 In Progress
+- [x] **Advanced analytics** - Basic charts implemented, advanced features in progress (80%)
+- [ ] **Team collaboration features** - Structure ready, full features in development (30%)
+- [ ] **API documentation** - Basic docs available, OpenAPI/Swagger in progress (60%)
+
+### 📋 Planned
+- [ ] AI agent modules - Chat assistant, content generation, smart recommendations
+- [ ] Multi-tenancy support - Organization/workspace model with data isolation
+- [ ] White-label capabilities - Custom branding, domains, themes (Enterprise only)
+- [ ] Mobile app - React Native iOS/Android app with offline support
+- [ ] Midtrans integration - Payment gateway for Indonesian market
+
+> 📊 **Progress:** 2/9 features complete (22%) | See [ROADMAP-PROGRESS.md](./ROADMAP-PROGRESS.md) for details
 
 ## License
 
