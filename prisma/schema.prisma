@@ -179,6 +179,23 @@ model Organization {
   // Settings
   settings    String?  // JSON string for custom settings
   
+  // White-Label Branding
+  brandName        String?
+  brandLogo        String?
+  brandFavicon     String?
+  brandPrimaryColor String?  @default("#3b82f6")
+  brandSecondaryColor String? @default("#8b5cf6")
+  brandFont        String?  @default("Inter")
+  customCss        String?
+  customJs         String?
+  hidePoweredBy    Boolean  @default(false)
+  
+  // Email Branding
+  emailFromName    String?
+  emailFromAddress String?
+  emailLogo        String?
+  emailFooter      String?
+  
   // Subscription & Billing
   plan                   String    @default("FREE")
   stripeCustomerId       String?   @unique
