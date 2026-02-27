@@ -15,10 +15,12 @@ import {
   Gift,
   Plug,
   Shield,
+  Bot,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
+  { name: 'AI Assistant', href: '/app/ai-assistant', icon: Bot },
   { name: 'Analytics', href: '/app/analytics', icon: BarChart },
   { name: 'Activity', href: '/app/activity', icon: Activity },
   { name: 'Profile', href: '/app/profile', icon: User },
