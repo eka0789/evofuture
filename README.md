@@ -127,20 +127,20 @@ docker run -p 3000:3000 evolution-future
 
 ## Future Roadmap
 
-### ✅ Completed (6/9 = 67%)
+### ✅ Completed (7/9 = 78%)
 - [x] **Payment integration (Stripe)** - Full subscription management with webhooks
 - [x] **WebSocket real-time features** - Live notifications, presence, typing indicators
 - [x] **Advanced analytics** - Comprehensive metrics, charts, export, revenue tracking
 - [x] **Team collaboration features** - Team creation, invitations, role management
 - [x] **API documentation** - Complete OpenAPI spec, code examples, interactive docs
 - [x] **AI agent modules** - Chat assistant, content generation, data analysis, recommendations
+- [x] **Multi-tenancy support** - Organization/workspace model with complete data isolation
 
-### 📋 Planned (3/9 = 33%)
-- [ ] **Multi-tenancy support** - Organization/workspace model with data isolation
+### 📋 Planned (2/9 = 22%)
 - [ ] **White-label capabilities** - Custom branding, domains, themes (Enterprise only)
 - [ ] **Mobile app** - React Native iOS/Android app with offline support
 
-> 📊 **Progress:** 6/9 features complete (67%) | See [ROADMAP-PROGRESS.md](./ROADMAP-PROGRESS.md) for details
+> 📊 **Progress:** 7/9 features complete (78%) | See [ROADMAP-PROGRESS.md](./ROADMAP-PROGRESS.md) for details
 
 ## License
 

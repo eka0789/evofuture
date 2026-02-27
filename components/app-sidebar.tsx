@@ -16,11 +16,13 @@ import {
   Plug,
   Shield,
   Bot,
+  Building2,
 } from 'lucide-react';
 
 const navigation = [
   { name: 'Dashboard', href: '/app/dashboard', icon: LayoutDashboard },
   { name: 'AI Assistant', href: '/app/ai-assistant', icon: Bot },
+  { name: 'Organizations', href: '/app/organization', icon: Building2 },
   { name: 'Analytics', href: '/app/analytics', icon: BarChart },
   { name: 'Activity', href: '/app/activity', icon: Activity },
   { name: 'Profile', href: '/app/profile', icon: User },

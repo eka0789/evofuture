@@ -38,6 +38,9 @@ model User {
   stripeCurrentPeriodEnd DateTime?
   plan                   String    @default("FREE")
 
+  // Multi-tenancy
+  organizationMembers OrganizationMember[]
+
   @@index([email])
   @@map("users")
 }
@@ -82,18 +85,21 @@ model VerificationToken {
 }
 
 model Activity {
-  id          String   @id @default(uuid())
-  userId      String
-  action      String
-  description String?
-  metadata    String?
-  ipAddress   String?
-  userAgent   String?
-  createdAt   DateTime @default(now())
+  id             String   @id @default(uuid())
+  userId         String
+  organizationId String?
+  action         String
+  description    String?
+  metadata       String?
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([organizationId])
   @@index([createdAt])
   @@map("activities")
 }
@@ -114,16 +120,19 @@ model Notification {
 }
 
 model Team {
-  id          String   @id @default(uuid())
-  name        String
-  slug        String   @unique
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  organizationId String?
+  name           String
+  slug           String   @unique
+  description    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
-  members     TeamMember[]
-  invitations TeamInvitation[]
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      TeamMember[]
+  invitations  TeamInvitation[]
 
+  @@index([organizationId])
   @@map("teams")
 }
 
@@ -157,4 +166,78 @@ model TeamInvitation {
   @@index([teamId])
   @@index([email])
   @@map("team_invitations")
+}
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  slug        String   @unique
+  description String?
+  logo        String?
+  domain      String?  @unique
+  
+  // Settings
+  settings    String?  // JSON string for custom settings
+  
+  // Subscription & Billing
+  plan                   String    @default("FREE")
+  stripeCustomerId       String?   @unique
+  stripeSubscriptionId   String?   @unique
+  stripePriceId          String?
+  stripeCurrentPeriodEnd DateTime?
+  
+  // Resource Limits
+  maxUsers      Int      @default(5)
+  maxStorage    Int      @default(1000) // MB
+  maxApiCalls   Int      @default(1000) // per month
+  
+  // Status
+  status        String   @default("ACTIVE") // ACTIVE, SUSPENDED, DELETED
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  deletedAt     DateTime?
+
+  // Relations
+  members       OrganizationMember[]
+  invitations   OrganizationInvitation[]
+  activities    Activity[]
+  teams         Team[]
+
+  @@index([slug])
+  @@index([domain])
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid())
+  organizationId String
+  userId         String
+  role           String   @default("MEMBER") // OWNER, ADMIN, MEMBER
+  joinedAt       DateTime @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("organization_members")
+}
+
+model OrganizationInvitation {
+  id             String    @id @default(uuid())
+  organizationId String
+  email          String
+  role           String    @default("MEMBER")
+  token          String    @unique
+  expiresAt      DateTime
+  createdAt      DateTime  @default(now())
+  acceptedAt     DateTime?
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("organization_invitations")
 }
